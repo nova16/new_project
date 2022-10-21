@@ -229,7 +229,7 @@ class _ItemListDocState extends State<ItemListDoc> {
     String idDoc = unid.toString();
     String idAuth = unid_author.toString();
 
-    final uri = Uri.parse("http://192.168.1.7/api/api/document/remove");
+    final uri = Uri.parse("http://192.168.1.4/api/api/document/remove");
 
     var request = http.MultipartRequest('POST', uri);
 

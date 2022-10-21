@@ -158,10 +158,10 @@ class _DocPageState extends State<DocPage> {
     log("is qs empty ? ${qs.isEmpty.toString()}");
     String now = DateTime.now().microsecondsSinceEpoch.toString();
     // if (qs.isNotEmpty) {
-    res = await Dio().get("http://192.168.1.7/api/api/document/list?t=$now",
+    res = await Dio().get("http://192.168.1.4/api/api/document/list?t=$now",
         queryParameters: qs);
     // } else {
-    //   res = await Dio().get("http://192.168.1.7/api_kpu/api/document/list");
+    //   res = await Dio().get("http://192.168.1.4/api_kpu/api/document/list");
     // }
     // log("RES ${res.toString()}");
     var dataDoc = res.data;
@@ -578,7 +578,7 @@ class _DocPageState extends State<DocPage> {
   void sendDocument(context, unid) async {
     String strLabelDoc = labelDoc.text;
     var unid_author = unid_employee;
-    final uri = Uri.parse("http://192.168.1.7/api/api/document/upload");
+    final uri = Uri.parse("http://192.168.1.4/api/api/document/upload");
 
     var request = http.MultipartRequest('POST', uri);
 

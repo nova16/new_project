@@ -91,10 +91,10 @@ class _HomePageState extends State<HomePage> {
     log("is qs empty ? ${qs.isEmpty.toString()}");
     String now = DateTime.now().microsecondsSinceEpoch.toString();
     // if (qs.isNotEmpty) {
-    res = await Dio().get("http://192.168.1.7/api/api/document/list?t=$now",
+    res = await Dio().get("http://192.168.1.4/api/api/document/list?t=$now",
         queryParameters: qs);
     // } else {
-    //   res = await Dio().get("http://192.168.1.7/api_kpu/api/document/list");
+    //   res = await Dio().get("http://192.168.1.4/api_kpu/api/document/list");
     // }
     log("RES ${res.toString()}");
     var dataDoc = res.data;
@@ -363,7 +363,7 @@ class _HomePageState extends State<HomePage> {
                             //     fit: BoxFit.cover),
                             child: (employee_photo == "")
                                 ? Image.network(
-                                    "http://192.168.1.7/api/uploads/profile/doraemon.png",
+                                    "http://192.168.1.4/api/uploads/profile/doraemon.png",
                                     fit: BoxFit.cover)
                                 : Image.network(employee_photo,
                                     fit: BoxFit.cover)),
@@ -949,7 +949,7 @@ class _HomePageState extends State<HomePage> {
                                   padding: const EdgeInsets.all(10),
                                   child: (employee_photo == "")
                                       ? Image.network(
-                                          "http://192.168.1.7/api/uploads/profile/doraemon.png",
+                                          "http://192.168.1.4/api/uploads/profile/doraemon.png",
                                           fit: BoxFit.cover)
                                       : Image.network(employee_photo,
                                           fit: BoxFit.cover),
@@ -1053,7 +1053,7 @@ class _HomePageState extends State<HomePage> {
     // log("$dataMap $nameDoc $dataForm");
 
     var res = await Dio()
-        .post('http://192.168.1.7/api/api/employee/updatefoto', data: dataForm);
+        .post('http://192.168.1.4/api/api/employee/updatefoto', data: dataForm);
     log("$res");
     var rdata = res.data;
     if (rdata['status'] == 200) {
@@ -1108,7 +1108,7 @@ class _HomePageState extends State<HomePage> {
   void sendDocument(context, unid) async {
     String strLabelDoc = labelDoc.text;
     var unid_author = unid_employee;
-    final uri = Uri.parse("http://192.168.1.7/api/api/document/upload");
+    final uri = Uri.parse("http://192.168.1.4/api/api/document/upload");
 
     var request = http.MultipartRequest('POST', uri);
 
