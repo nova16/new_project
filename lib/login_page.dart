@@ -57,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
 
     // try {
     final response =
-        await http.post(Uri.parse("http://192.168.1.4/api/api/auth/login"),
+        await http.post(Uri.parse("https://kpu-cimahi.com/api/auth/login"),
             headers: {'Content-Type': 'application/json; charset=UTF-8'},
             body: jsonEncode({
               "email": email,

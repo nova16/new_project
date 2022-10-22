@@ -16,6 +16,9 @@ class ItemListDoc extends StatefulWidget {
   final BuildContext contextMain;
   final String search;
   final String owner;
+  final bool editable;
+  final bool deleteable;
+
   // final Function() showForm;
   const ItemListDoc(
       {super.key,
@@ -24,7 +27,11 @@ class ItemListDoc extends StatefulWidget {
       required this.editData,
       required this.contextMain,
       required this.search,
-      required this.owner});
+      required this.owner,
+      bool? editable,
+      bool? deleteable})
+      : this.editable = editable ?? true,
+        this.deleteable = deleteable ?? true;
 
   @override
   State<ItemListDoc> createState() => _ItemListDocState();
@@ -66,7 +73,7 @@ class _ItemListDocState extends State<ItemListDoc> {
   void initState() {
     getPref();
 
-    log("Build COmplete");
+    // log("Build COmplete");
 
     super.initState();
   }
@@ -152,8 +159,9 @@ class _ItemListDocState extends State<ItemListDoc> {
                               },
                             ),
                       trailing: widget.documentList[i]
-                                  ['unid_author_employee'] ==
-                              unid_employee
+                                      ['unid_author_employee'] ==
+                                  unid_employee &&
+                              widget.deleteable == true
                           ? IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () => {
@@ -229,7 +237,7 @@ class _ItemListDocState extends State<ItemListDoc> {
     String idDoc = unid.toString();
     String idAuth = unid_author.toString();
 
-    final uri = Uri.parse("http://192.168.1.4/api/api/document/remove");
+    final uri = Uri.parse("https://kpu-cimahi.com/api/document/remove");
 
     var request = http.MultipartRequest('POST', uri);
 
@@ -277,11 +285,12 @@ class _ItemListDocState extends State<ItemListDoc> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            unid_author.toString() == auth_session.toString()
+                            unid_author.toString() == auth_session.toString() &&
+                                    widget.editable == true
                                 ? ElevatedButton(
                                     onPressed: () => {
                                       widget.editData(contextMain, unid,
-                                          unid_author, label, file)
+                                          unid_author, label, fullpath, 'pdf')
                                     },
                                     child: const Text("Edit",
                                         style: TextStyle(color: Colors.white)),
@@ -384,13 +393,14 @@ class _ItemListDocState extends State<ItemListDoc> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          unid_author.toString() == auth_session.toString()
+                          unid_author.toString() == auth_session.toString() &&
+                                  widget.editable == true
                               ? Padding(
                                   padding: const EdgeInsets.only(left: 10),
                                   child: ElevatedButton(
                                     onPressed: () => {
                                       widget.editData(contextMain, unid,
-                                          unid_author, label, "")
+                                          unid_author, label, fullpath, 'image')
                                     },
                                     // style: ElevatedButton.styleFrom(
                                     //     shape: StadiumBorder(),
@@ -464,7 +474,24 @@ class _ItemListDocState extends State<ItemListDoc> {
                         physics: ScrollPhysics(),
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Image.network(fullpath.toString()),
+                          // child: Image.network(fullpath.toString()),
+                          child: Image.network(
+                            fullpath.toString(),
+                            fit: BoxFit.contain,
+                            loadingBuilder: (BuildContext context, Widget child,
+                                ImageChunkEvent? loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       )),
                     ],

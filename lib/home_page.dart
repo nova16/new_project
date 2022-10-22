@@ -17,6 +17,8 @@ import 'doc_list.dart';
 import 'login_page.dart';
 import 'setting_page.dart';
 import 'doc_page.dart';
+import 'dart:io';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -62,9 +64,12 @@ class _HomePageState extends State<HomePage> {
   String? lastDate = "";
   Future<List>? listDoc;
   List tListDoc = [];
+  bool uploadFoto = false;
+  bool uploadDocument = false;
 
   // Future<List> getDocument(query, auth, [ld = "", reload = false]) async {
   Future<List> getDocument() async {
+    log("LOad Data home");
     setState(() {
       isLoading = true;
     });
@@ -91,8 +96,8 @@ class _HomePageState extends State<HomePage> {
     log("is qs empty ? ${qs.isEmpty.toString()}");
     String now = DateTime.now().microsecondsSinceEpoch.toString();
     // if (qs.isNotEmpty) {
-    res = await Dio().get("http://192.168.1.4/api/api/document/list?t=$now",
-        queryParameters: qs);
+    res = await Dio()
+        .get("https://kpu-cimahi.com/api/document/list", queryParameters: qs);
     // } else {
     //   res = await Dio().get("http://192.168.1.4/api_kpu/api/document/list");
     // }
@@ -108,10 +113,8 @@ class _HomePageState extends State<HomePage> {
       lastDate = tmpDoc.last['create_time'];
     } else {
       log("RETURN ORIGINAL");
-      tListDoc = tmpDoc;
-      if (tmpDoc.isNotEmpty) {
-        lastDate = tmpDoc.last['create_time'];
-      }
+      List tmpDocGet = dataDoc['data'];
+      tmpDoc = tmpDocGet;
       // log(tmpDoc.toString())
     }
     setState(() {
@@ -121,7 +124,11 @@ class _HomePageState extends State<HomePage> {
     // return dataDoc['data'];
   }
 
-  void dataDoc() {
+  void dataDoc(
+      [String dummy1 = "",
+      String dummy2 = "",
+      String dummy3 = "",
+      bool dumy3 = true]) {
     // log("params $querySearch + $authData + $ld + $reload");
 
     // queryDoc = querySearch.toString();
@@ -202,8 +209,9 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     getPref();
-    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => dataDoc());
+    log("HOme Page INIT");
+    super.initState();
   }
 
   @override
@@ -268,6 +276,7 @@ class _HomePageState extends State<HomePage> {
                           search: "",
                           owner: "",
                           contextMain: context,
+                          editable: false,
                         )
                       : const Center(child: CircularProgressIndicator());
                 }),
@@ -363,7 +372,7 @@ class _HomePageState extends State<HomePage> {
                             //     fit: BoxFit.cover),
                             child: (employee_photo == "")
                                 ? Image.network(
-                                    "http://192.168.1.4/api/uploads/profile/doraemon.png",
+                                    "https://kpu-cimahi.com/uploads/profile/doraemon.png",
                                     fit: BoxFit.cover)
                                 : Image.network(employee_photo,
                                     fit: BoxFit.cover)),
@@ -502,8 +511,10 @@ class _HomePageState extends State<HomePage> {
               ),
               InkWell(
                 onTap: () {
-                  Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => const DocPage()));
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(
+                          builder: (context) => const DocPage()))
+                      .then((data) => dataDoc());
                 },
                 child: Container(
                   margin: const EdgeInsets.all(0),
@@ -775,147 +786,180 @@ class _HomePageState extends State<HomePage> {
                   margin: const EdgeInsets.only(
                       left: 20.0, right: 25.0, top: 25.0, bottom: 25.0),
                   color: Colors.white,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Container(
-                                // These values are based on trial & error method
-                                alignment: Alignment.centerRight,
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.of(context, rootNavigator: true)
-                                        .pop();
-                                  },
-                                  child: const Icon(
-                                    Icons.close,
-                                    color: Colors.black,
-                                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      uploadDocument == true
+                          ? const LinearProgressIndicator()
+                          : const SizedBox.shrink(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          const Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Text(
+                              "Form Upload",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Container(
+                              // These values are based on trial & error method
+                              alignment: Alignment.centerRight,
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                },
+                                child: const Icon(
+                                  Icons.close,
+                                  color: Colors.black,
                                 ),
                               ),
                             ),
-                          ],
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(
+                        width: 50,
+                        height: 50,
+                        child: Image(
+                            image: AssetImage("assets/images/icon-cloud.png")),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10.0),
+                        child: TextField(
+                          controller: labelDoc,
+                          textAlign: TextAlign.left,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            hintText: 'Nama Dokumen',
+                            fillColor: Colors.white70,
+                          ),
                         ),
-                        const Text(
-                          "Form Upload",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                        ),
-                        const SizedBox(
-                          width: 100,
-                          height: 100,
-                          child: Image(
-                              image:
-                                  AssetImage("assets/images/icon-cloud.png")),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: TextField(
-                            controller: labelDoc,
-                            textAlign: TextAlign.left,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Row(
+                            // mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Expanded(
+                                child: RawMaterialButton(
+                                  onPressed: () {},
+                                  elevation: 2.0,
+                                  fillColor: Colors.amber,
+                                  padding: const EdgeInsets.all(15.0),
+                                  shape: const CircleBorder(),
+                                  child: IconButton(
+                                    icon: const Icon(Icons.file_present),
+                                    onPressed: () {
+                                      selectDocument(context, setState);
+                                    },
+                                  ),
+                                ),
                               ),
-                              hintText: 'Nama Dokumen',
-                              fillColor: Colors.white70,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Row(
-                              // mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Expanded(
-                                  child: RawMaterialButton(
-                                    onPressed: () {},
-                                    elevation: 2.0,
-                                    fillColor: Colors.amber,
-                                    padding: const EdgeInsets.all(15.0),
-                                    shape: const CircleBorder(),
-                                    child: IconButton(
-                                      icon: const Icon(Icons.file_present),
-                                      onPressed: () {
-                                        selectDocument(context, setState);
-                                      },
-                                    ),
+                              Expanded(
+                                child: RawMaterialButton(
+                                  onPressed: () {},
+                                  elevation: 2.0,
+                                  fillColor: Colors.lightBlue,
+                                  padding: const EdgeInsets.all(15.0),
+                                  shape: const CircleBorder(),
+                                  child: IconButton(
+                                    icon: const Icon(Icons.photo),
+                                    onPressed: () {
+                                      takeImage(ImageSource.gallery, context,
+                                          setState);
+                                    },
                                   ),
                                 ),
-                                Expanded(
-                                  child: RawMaterialButton(
-                                    onPressed: () {},
-                                    elevation: 2.0,
-                                    fillColor: Colors.lightBlue,
-                                    padding: const EdgeInsets.all(15.0),
-                                    shape: const CircleBorder(),
-                                    child: IconButton(
-                                      icon: const Icon(Icons.photo),
-                                      onPressed: () {
-                                        takeImage(ImageSource.gallery, context,
-                                            setState);
-                                      },
-                                    ),
+                              ),
+                              Expanded(
+                                child: RawMaterialButton(
+                                  onPressed: () {},
+                                  elevation: 2.0,
+                                  fillColor: Colors.cyanAccent,
+                                  padding: const EdgeInsets.all(15.0),
+                                  shape: const CircleBorder(),
+                                  child: IconButton(
+                                    icon: const Icon(Icons.camera_alt),
+                                    onPressed: () {
+                                      takeImage(ImageSource.camera, context,
+                                          setState);
+                                    },
                                   ),
                                 ),
-                                Expanded(
-                                  child: RawMaterialButton(
-                                    onPressed: () {},
-                                    elevation: 2.0,
-                                    fillColor: Colors.cyanAccent,
-                                    padding: const EdgeInsets.all(15.0),
-                                    shape: const CircleBorder(),
-                                    child: IconButton(
-                                      icon: const Icon(Icons.camera_alt),
-                                      onPressed: () {
-                                        takeImage(ImageSource.camera, context,
-                                            setState);
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ]),
+                              ),
+                            ]),
+                      ),
+
+                      Expanded(
+                        child: LayoutBuilder(builder: (context, constraints) {
+                          log("FILE IS $file");
+                          if (file == false) {
+                            log("FILE IS NONNE");
+                            return const SizedBox.shrink();
+                          } else if (file is FilePickerResult) {
+                            var path = file.files.single.path;
+                            log('pdfupdate $path');
+                            return FractionallySizedBox(
+                                heightFactor: 1,
+                                child:
+                                    PDFView(filePath: path, enableSwipe: true));
+                          } else {
+                            var path = file.path;
+                            return Image.file(File(path));
+                          }
+                        }),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 40),
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () =>
+                              {sendDocument(context, unid, setState)},
+                          style: ElevatedButton.styleFrom(
+                              shape: const StadiumBorder(),
+                              minimumSize: const Size(double.infinity, 50)),
+                          child: const Text("Upload Dokumen"),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Text(
-                            isUpdate == true
-                                ? "Tidak Perlu Melampirkan File Jika Hanya Ingin Mengubah Label"
-                                : nameDoc.toString(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14),
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 40),
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () => {sendDocument(context, unid)},
-                              style: ElevatedButton.styleFrom(
-                                  shape: const StadiumBorder(),
-                                  minimumSize: const Size(double.infinity, 50)),
-                              child: const Text("Upload Dokumen"),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                      // Padding(
+                      //   padding: const EdgeInsets.all(20.0),
+                      //   child: Text(
+                      //     isUpdate == true
+                      //         ? "Tidak Perlu Melampirkan File Jika Hanya Ingin Mengubah Label"
+                      //         : nameDoc.toString(),
+                      //     style: const TextStyle(
+                      //         fontWeight: FontWeight.bold, fontSize: 14),
+                      //   ),
+                      // ),
+                      // Align(
+                      //   alignment: Alignment.bottomCenter,
+                      //   child: Container(
+                      //     margin: const EdgeInsets.symmetric(
+                      //         horizontal: 20, vertical: 40),
+                      //     width: double.infinity,
+                      //     child: ElevatedButton(
+                      //       onPressed: () => {sendDocument(context, unid)},
+                      //       style: ElevatedButton.styleFrom(
+                      //           shape: const StadiumBorder(),
+                      //           minimumSize: const Size(double.infinity, 50)),
+                      //       child: const Text("Upload Dokumen"),
+                      //     ),
+                      //   ),
+                      // ),
+                    ],
                   ),
                 ),
               )),
@@ -943,16 +987,60 @@ class _HomePageState extends State<HomePage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
+                              (uploadFoto == true)
+                                  ? const LinearProgressIndicator()
+                                  : const SizedBox.shrink(),
                               Expanded(
                                 child: Container(
                                   alignment: Alignment.center,
                                   padding: const EdgeInsets.all(10),
                                   child: (employee_photo == "")
                                       ? Image.network(
-                                          "http://192.168.1.4/api/uploads/profile/doraemon.png",
-                                          fit: BoxFit.cover)
-                                      : Image.network(employee_photo,
-                                          fit: BoxFit.cover),
+                                          "https://kpu-cimahi.com/uploads/profile/doraemon.png",
+                                          fit: BoxFit.contain,
+                                          loadingBuilder: (BuildContext context,
+                                              Widget child,
+                                              ImageChunkEvent?
+                                                  loadingProgress) {
+                                            if (loadingProgress == null)
+                                              return child;
+                                            return Center(
+                                              child: CircularProgressIndicator(
+                                                value: loadingProgress
+                                                            .expectedTotalBytes !=
+                                                        null
+                                                    ? loadingProgress
+                                                            .cumulativeBytesLoaded /
+                                                        loadingProgress
+                                                            .expectedTotalBytes!
+                                                    : null,
+                                              ),
+                                            );
+                                          },
+                                        )
+                                      : Image.network(
+                                          employee_photo,
+                                          fit: BoxFit.contain,
+                                          loadingBuilder: (BuildContext context,
+                                              Widget child,
+                                              ImageChunkEvent?
+                                                  loadingProgress) {
+                                            if (loadingProgress == null)
+                                              return child;
+                                            return Center(
+                                              child: CircularProgressIndicator(
+                                                value: loadingProgress
+                                                            .expectedTotalBytes !=
+                                                        null
+                                                    ? loadingProgress
+                                                            .cumulativeBytesLoaded /
+                                                        loadingProgress
+                                                            .expectedTotalBytes!
+                                                    : null,
+                                              ),
+                                            );
+                                          },
+                                        ),
                                 ),
                               ),
                               Container(
@@ -1011,7 +1099,7 @@ class _HomePageState extends State<HomePage> {
 
   //Take Image and Send Image
   Future takeImage(ImageSource media, context, setState) async {
-    file = await picker.pickImage(source: media);
+    file = await picker.pickImage(source: media, maxHeight: 600);
     if (file != null) {
       // final tempDir = await getTemporaryDirectory();
       // final path = tempDir.path;
@@ -1022,12 +1110,14 @@ class _HomePageState extends State<HomePage> {
         //   log("setstate" + file.toString());
       });
       // showAlert(context:context);
-    } else {}
+    } else {
+      file = false;
+    }
     log("cek file image:$file");
   }
 
   Future takeFoto(ImageSource media, context, insetState) async {
-    file = await picker.pickImage(source: media);
+    file = await picker.pickImage(source: media, maxHeight: 400);
     if (file != null) {
       // final tempDir = await getTemporaryDirectory();
       // final path = tempDir.path;
@@ -1038,6 +1128,9 @@ class _HomePageState extends State<HomePage> {
       //   //   log("setstate" + file.toString());
       // });
       // showAlert(context:context);
+      insetState(() {
+        uploadFoto = true;
+      });
       sendFoto(context, file.path, insetState);
     } else {}
     log("cek file image:$file");
@@ -1050,68 +1143,103 @@ class _HomePageState extends State<HomePage> {
       "unid": unid_employee,
       "foto": await MultipartFile.fromFile(path, filename: nameDoc)
     });
-    // log("$dataMap $nameDoc $dataForm");
+    log("$dataMap $nameDoc $dataForm");
+    log("send foto");
+    try {
+      var res = await Dio().post(
+        'https://kpu-cimahi.com/api/employee/updatefoto/',
+        data: dataForm,
+        onSendProgress: (int sent, int total) {
+          print('$sent $total');
+        },
+      );
+      log("$res");
+      var rdata = res.data;
+      if (rdata['status'] == 200) {
+        String now = DateTime.now().microsecondsSinceEpoch.toString();
+        SharedPreferences pref = await SharedPreferences.getInstance();
+        await pref.setString("photo", rdata['path'] + "?" + now.toString());
 
-    var res = await Dio()
-        .post('http://192.168.1.4/api/api/employee/updatefoto', data: dataForm);
-    log("$res");
-    var rdata = res.data;
-    if (rdata['status'] == 200) {
-      String now = DateTime.now().microsecondsSinceEpoch.toString();
-      SharedPreferences pref = await SharedPreferences.getInstance();
-      await pref.setString("photo", rdata['path'] + "?" + now.toString());
-      setState(() {
-        employee_photo = rdata['path'] + "?" + now.toString();
-      });
-      insetState((){
-        employee_photo = rdata['path'] + "?" + now.toString();
-      });
-      // Navigator.of(context, rootNavigator: true).pop();
-      Fluttertoast.showToast(
-          msg: "Update Profil Foto Berhasil",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.TOP);
-    } else {
-      Fluttertoast.showToast(
-          msg: rdata['errors'],
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.TOP);
+        insetState(() {
+          employee_photo = rdata['path'] + "?" + now.toString();
+          uploadFoto = false;
+        });
+
+        setState(() {
+          employee_photo = rdata['path'] + "?" + now.toString();
+          uploadFoto = false;
+        });
+
+        // Navigator.of(context, rootNavigator: true).pop();
+        Fluttertoast.showToast(
+            msg: "Update Profil Foto Berhasil",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.TOP);
+      } else {
+        Fluttertoast.showToast(
+            msg: rdata['errors'],
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.TOP);
+      }
+    } catch (e) {
+      print(e);
     }
   }
 
-  selectDocument(context, setState) async {
+  selectDocument(context, insetState) async {
     PlatformFile fileDoc;
     String nameFile = "";
-
-    file = await FilePicker.platform.pickFiles(
+    var tmpFile;
+    var oldFile = file;
+    setState(() {
+      file = false;
+    });
+    insetState(() {
+      file = false;
+    });
+    tmpFile = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
     );
     log("cek file pdf baru: $file");
 
-    if (file != null) {
-      fileDoc = file.files.first;
+    if (tmpFile != null) {
+      fileDoc = tmpFile.files.first;
       nameFile = fileDoc.name;
       log("cek nama file $nameFile");
     } else {
+      tmpFile = oldFile;
       // User canceled the picker
     }
     log("cek file: $nameFile");
     setState(() {
       // file = selectedfile!.toString();
+      file = tmpFile;
+      nameDoc = nameFile.toString();
+      // showAlert(context:context);
+    });
+    insetState(() {
+      // file = selectedfile!.toString();
+      file = tmpFile;
       nameDoc = nameFile.toString();
       // showAlert(context:context);
     });
   }
 
 //Send Document to DB
-  void sendDocument(context, unid) async {
+  void sendDocument(context, unid, insetState) async {
     String strLabelDoc = labelDoc.text;
     var unid_author = unid_employee;
-    final uri = Uri.parse("http://192.168.1.4/api/api/document/upload");
+    final uri = Uri.parse("https://kpu-cimahi.com/api/document/upload");
 
     var request = http.MultipartRequest('POST', uri);
 
+    setState(() {
+      uploadDocument = true;
+    });
+    insetState(() {
+      uploadDocument = true;
+    });
     log("SEND FILE $file");
 
     if (file == null || file == false) {
@@ -1141,6 +1269,12 @@ class _HomePageState extends State<HomePage> {
 
     await request.send().then((result) {
       http.Response.fromStream(result).then((response) {
+        setState(() {
+          uploadDocument = false;
+        });
+        insetState(() {
+          uploadDocument = false;
+        });
         Map<String, dynamic> message = jsonDecode(response.body);
         //  log(message.toString());
         log('cek:${response.body}');

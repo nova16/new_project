@@ -29,51 +29,41 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  flutter:
-    sdk: flutter
-  
-
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-  http: ^0.13.5
-  shared_preferences: ^2.0.15
+  d_view: ^0.0.2
   email_validator: ^2.1.17
+  flutter:
+    sdk: flutter
+  get: ^4.6.3
+  http: ^0.13.5
   image_picker: ^0.8.5+3
   path_provider: ^2.0.11
-  d_view: ^0.0.2
-  get: ^4.6.3
   progress_loading_button: '^1.0.0'
+  shared_preferences: ^2.0.15
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
- 
   advance_pdf_viewer: ^2.0.1
-  toast: ^0.3.0
-  fluttertoast: ^8.0.9
   dio: ^4.0.6
   easy_debounce: ^2.0.2+1
   file_picker: ^4.5.0
+  firebase_core: ^1.24.0
+  firebase_messaging: ^12.0.3
   flutter_const: ^0.0.7
+  flutter_lints: ^2.0.0
+  flutter_pdfview: ^1.2.5
+  flutter_test:
+    sdk: flutter
+  fluttertoast: ^8.0.9
   infinite_scroll_pagination: ^3.2.0
   path: ^1.8.2
   syncfusion_flutter_pdfviewer: ^20.3.48
-  firebase_core: ^1.24.0
-  firebase_messaging: ^12.0.3
-  flutter_pdfview: ^1.2.5
-
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  toast: ^0.3.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
 # The following section is specific to Flutter packages.
 flutter:
 
@@ -89,8 +79,6 @@ flutter:
   #   - assets/images/icon-upload.png
   #   - assets/images/icon-user.png
   #   - assets/images/icon-cloud.png
-
-
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/logo-kpu.png
@@ -100,17 +88,10 @@ flutter:
     - assets/images/icon-upload.png
     - assets/images/icon-user.png
     - assets/images/icon-cloud.png
-
-
-
-
-
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
-
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/assets-and-images/#from-packages
-
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a
